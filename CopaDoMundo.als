@@ -36,14 +36,19 @@ fact cardinalidadeJogo{
   --  all j:Jogo | #(j.selecao1) >= 1
   --  all j:Jogo | #(j.selecao2) >= 1
   --  all j: Jogo | j.selecao1 != j.selecao2
+}
+fact {
+	#Grupo = 4
+	#Copa = 1
+	#SelecaoCampeaDoMundo = 1
+}
+
+fact{
+	all s:Selecao | some s.~selecoes 
 	all c:Copa | #(c.grupos) = 4
 	all g:Grupo | #(g.selecoes) = 4
-	all g1:Grupo | all g2:Grupo | (g1 != g2) =>  (g1.selecoes != g2.selecoes) 
-#Grupo = 4
-#Copa = 1
-#SelecaoCampeaDoMundo = 1
-
+	all g1:Grupo | all g2:Grupo | (g1 != g2) =>  (g1.selecoes != g2.selecoes)
 }
 
 pred show[]{}
-run show for 15
+run show for 30 --nao sei porque mas se colocar 30 funciona na primeira vez

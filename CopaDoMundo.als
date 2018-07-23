@@ -15,22 +15,31 @@ sig Grupo {
 --}
 
 sig Selecao {
---	pessoas: set Pessoa
+	titulares: set Jogador,
+	reservas: set Jogador,
+	medicos: set Medico,
+	comissaoTecnica: set ComissaoTecnica,
+	tecnico: one Tecnico
 }
+
+abstract sig Pessoa {}
+
+abstract sig Jogador extends Pessoa {}
+
+sig Titular extends Jogador {}
+sig Reserva extends Jogador {}
+
+sig Tecnico extends Pessoa {}
+sig Medico extends Pessoa {}
+sig ComissaoTecnica extends Pessoa {}
+
 
 sig SelecaoCampeaDoMundo in Selecao {}
 
---abstract sig Pessoa {}
 
---abstract sig Jogador extends Pessoa {}
---sig Titular extends Jogador {}
---sig Reserva extends Jogador {}
 
---sig Tecnico extends Pessoa {}
---sig Medico extends Pessoa {}
---sig ComissaoTecnica extends Pessoa {}
 
-fact cardinalidadeJogo{
+fact cardinalidadeJogo{	
    -- all c:Copa| some c.jogos -- copa ter pelo menos um jogo
   --  all j:Jogo | one j.~jogos -- jogo esta em uma copa
   --  all j:Jogo | #(j.selecao1) >= 1
@@ -41,6 +50,30 @@ fact {
 	#Grupo = 4
 	#Copa = 1
 	#SelecaoCampeaDoMundo = 1
+}
+
+fact{
+	#Selecao = 16
+}
+
+fact cardinalidadeSelecao{
+--	all s:Selecao | #(s.titulares) = 11
+--	all s:Selecao | #(s.reservas) = 11
+--	all s:Selecao | #(s.medicos) = 4
+--	all s:Selecao | #(s.comissaoTecnica) = 3
+
+
+--	all s1:Selecao | s1.titulares != s1.reservas -- jogador nao pode ser titular e reserva	
+--	all s1:Selecao| all s2:Selecao | (s1 != s2) => (s1.reservas != s2.reservas)
+--	all s1:Selecao| all s2:Selecao | (s1 != s2) => (s1.titulares != s2.titulares)
+--	all s1:Selecao| all s2:Selecao | (s1 != s2) => (s1.medicos != s2.medicos)
+--	all s1:Selecao| all s2:Selecao | (s1 != s2) => (s1.comissaoTecnica != s2.comissaoTecnica)
+
+	all s1:Selecao| all s2:Selecao | (s1 != s2) => (s1.tecnico != s2.tecnico)
+
+
+	all t:Tecnico| one t.~tecnico
+
 }
 
 fact{

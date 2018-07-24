@@ -17,8 +17,8 @@ sig Grupo {
 sig Selecao {
 --	titulares: set Jogador,
 --	reservas: set Jogador,
---	medicos: set Medico,
-	comissaoTecnica:  ComissaoTecnica,
+	medicos: set Medico, //ok
+--	comissaoTecnica:  ComissaoTecnica, //ok
 --	tecnico: one Tecnico //ok
 }
 
@@ -57,21 +57,25 @@ fact {
 
 fact{
 	#Selecao = 16
-	#ComissaoTecnica = 16
-	#PessoaComissao = 48
+--	#ComissaoTecnica = 16 //ok
+--	#PessoaComissao = 48 //ok
 }
 
 fact cardinalidadeSelecao{
 --	all s:Selecao | #(s.titulares) = 11
 --	all s:Selecao | #(s.reservas) = 11
---	all s:Selecao | #(s.medicos) = 4
 
 	//Facts referentes a COMISSAO TECNICA e PESSOA COMISSAO
-	all s:Selecao | #(s.comissaoTecnica) = 1 //ok
-	all c:ComissaoTecnica| #(c.pessoasComissao) = 3 //ok
-	all s1:Selecao| all s2:Selecao | (s1 != s2) => (s1.comissaoTecnica != s2.comissaoTecnica) //ok
-	all c: ComissaoTecnica | one c.~comissaoTecnica //ok
-	all p: PessoaComissao | one p.~pessoasComissao //ok
+--	all s:Selecao | #(s.comissaoTecnica) = 1 //ok
+--	all c:ComissaoTecnica| #(c.pessoasComissao) = 3 //ok
+--	all s1:Selecao| all s2:Selecao | (s1 != s2) => (s1.comissaoTecnica != s2.comissaoTecnica) //ok
+--	all c: ComissaoTecnica | one c.~comissaoTecnica //ok
+--	all p: PessoaComissao | one p.~pessoasComissao //ok
+
+	//Facts referentes a MEDICOS
+	all s:Selecao | #(s.medicos) = 4 //ok
+	all s1:Selecao| all s2:Selecao | (s1 != s2) => (s1.medicos != s2.medicos) //ok
+	all m: Medico | one m.~medicos //ok
 
 --	all s1:Selecao | s1.titulares != s1.reservas -- jogador nao pode ser titular e reserva	
 --	all s1:Selecao| all s2:Selecao | (s1 != s2) => (s1.reservas != s2.reservas)
@@ -91,5 +95,8 @@ fact{
 	all g1:Grupo | all g2:Grupo | (g1 != g2) =>  (g1.selecoes != g2.selecoes)
 }
 
+-- 30 para tecnico
+-- 64 para comissao
+-- 64 para medicos
 pred show[]{}
-run show for 70 --nao sei porque mas se colocar 30 funciona na primeira vez
+run show for 64 --nao sei porque mas se colocar 30 funciona na primeira vez

@@ -1,7 +1,7 @@
 module CopaDoMundo
 
 one sig Copa{
-	jogos: one Jogo,  --no maximo um jogo
+	jogos: one Jogo,  
 	grupos: set Grupo
 }
 
@@ -17,7 +17,6 @@ sig Jogo {
 sig Selecao {
 	titulares: set JogadorTitular,
 	reservas: set JogadorReserva,
---	jogadores: set Jogador,
 	medicos: set Medico, //ok
 	comissaoTecnica:  ComissaoTecnica, //ok
 	tecnico: one Tecnico //ok
@@ -50,23 +49,12 @@ fact cardinalidadeJogo{
     all j:Jogo | #(j.selecao2) = 1
     all j: Jogo | j.selecao1 != j.selecao2
 }
-fact {
-	#Grupo = 1
-	#Copa = 1
-	#SelecaoCampeaDoMundo = 1
-}
-
-fact{
-	#Selecao = 4
---	#ComissaoTecnica = 16 //ok
---	#PessoaComissao = 48 //ok
-}
 
 fact cardinalidadeSelecao{
 
  	// Facts para titulares e reservas
-    	all s:Selecao | #(s.titulares) = 11-- é necessario reduzir o nomero de 11 para um valor mais baixo para que não demore muito a gerar o grafico
-        all s:Selecao | #(s.reservas) = 11 -- é necessario reduzir o nomero de 11 para um valor mais baixo para que não demore muito a gerar o grafico
+    	all s:Selecao | #(s.titulares) = 2-- é necessario reduzir o nomero de 11 para um valor mais baixo para que não demore muito a gerar o grafico
+        all s:Selecao | #(s.reservas) = 2 -- é necessario reduzir o nomero de 11 para um valor mais baixo para que não demore muito a gerar o grafico
 
        all j:JogadorTitular | one  j.~titulares
 	all j1:JogadorReserva | one  j1.~reservas
@@ -81,13 +69,15 @@ fact cardinalidadeSelecao{
 	all s:Selecao | #(s.medicos) = 4 //ok
 	all m: Medico | one m.~medicos //ok
 
-
 	all t:Tecnico| one t.~tecnico // ok
-
 }
 
 
-fact{
+fact cardinalidadesGerais{
+	#Grupo = 1
+	#Copa = 1
+	#SelecaoCampeaDoMundo = 1
+	#Selecao = 4
 	all s:Selecao | some s.~selecoes 
 	all c:Copa | #(c.grupos) = 1
 	all g:Grupo | #(g.selecoes) = 4
@@ -123,5 +113,5 @@ assert SelecoesSaoDifeirentesSe{
 -- 64 para medicos
 -- 88 para jogadores
 pred show[]{}
-run show for 88 --nao sei porque mas se colocar 30 funciona na primeira vez
+run show for 64--nao sei porque mas se colocar 30 funciona na primeira vez
 

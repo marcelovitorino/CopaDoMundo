@@ -39,49 +39,68 @@ sig ComissaoTecnica extends Pessoa {
 	pessoasComissao: set PessoaComissao 
 }
 
-
 sig SelecaoCampeaDoMundo in Selecao {} -- in selecoes
 
-fact cardinalidadeJogo{	
+pred cardinalidadesJogo[j:Jogo]{
+	#(j.selecao1) = 1
+	#(j.selecao2) = 1
+	 one j.~jogos // Uma instancia de Jogo tem que estar conectada a o atributo jogos de Copa
+}
+fact factsCopaJogo{
     all c:Copa| one c.jogos -- copa ter  um jogo
-    all j:Jogo | one j.~jogos -- jogo esta em uma copa
-    all j:Jogo | #(j.selecao1) = 1
-    all j:Jogo | #(j.selecao2) = 1
+    all j: Jogo | cardinalidadesJogo[j]
     all j: Jogo | j.selecao1 != j.selecao2
 }
 
-fact cardinalidadeSelecao{
+pred EhCompostaPor[s:Selecao]{
+	
+	some s.titulares
+	some s.reservas
+	some s.medicos
+	one s.tecnico
+	one s.comissaoTecnica
+}
 
- 	// Facts para titulares e reservas
-    	all s:Selecao | #(s.titulares) = 2-- é necessario reduzir o nomero de 11 para um valor mais baixo para que não demore muito a gerar o grafico
-        all s:Selecao | #(s.reservas) = 2 -- é necessario reduzir o nomero de 11 para um valor mais baixo para que não demore muito a gerar o grafico
+pred CardinalidadesSelecao[s:Selecao]{
+	
+	#(s.titulares) = 11 -- é necessario reduzir o numero de 11 para um valor mais baixo para que seja possivel gerar o grafico OU diminuir a quantidade de grupos
+	#(s.reservas) = 11 -- é necessario reduzir o numero de 11 para um valor mais baixo para que seja possivel gerar o grafico OU diminuir a quantidade de grupos
+	#(s.medicos) = 4
+}
+
+pred CardinalidadesComissaoTecnica[c:ComissaoTecnica]{
+	
+	#(c.pessoasComissao) = 3
+	one c.~comissaoTecnica -- uma instancia de uma ComissaoTecnica tem que que estar ligada ao atributo comissaoTecnica de Selecao
+}
+
+fact FactsSelecao{
+
+ 	all s:Selecao | EhCompostaPor[s]
+    	all s:Selecao | CardinalidadesSelecao[s]
+	all c: ComissaoTecnica | CardinalidadesComissaoTecnica[c]
 
        all j:JogadorTitular | one  j.~titulares
 	all j1:JogadorReserva | one  j1.~reservas
 
-	//Facts referentes a COMISSAO TECNICA e PESSOA COMISSAO
-	all s:Selecao | #(s.comissaoTecnica) = 1 //ok
-	all c:ComissaoTecnica| #(c.pessoasComissao) = 3 //ok
-	all c: ComissaoTecnica | one c.~comissaoTecnica //ok
-	all p: PessoaComissao | one p.~pessoasComissao //ok
+--	all s:Selecao | #(s.comissaoTecnica) = 1 //ok
 
-	//Facts referentes a MEDICOS
-	all s:Selecao | #(s.medicos) = 4 //ok
-	all m: Medico | one m.~medicos //ok
-
-	all t:Tecnico| one t.~tecnico // ok
+	all p: PessoaComissao | one p.~pessoasComissao // Toda instancia de uma PessoaComissao tem que que estar ligada ao set pessoasComissao de ComissaoTecnica
+	all m: Medico | one m.~medicos  // Toda instancia de um Medico tem que que estar ligada ao set medicos de Selecao
+	all t:Tecnico| one t.~tecnico // Toda instancia de um Tecnico tem que que estar ligada ao atributo tecnico de Selecao
 }
 
 
 fact cardinalidadesGerais{
-	#Grupo = 1
 	#Copa = 1
-	#SelecaoCampeaDoMundo = 1
+	#Grupo = 1
 	#Selecao = 4
+	#SelecaoCampeaDoMundo = 1
 	all s:Selecao | some s.~selecoes 
 	all c:Copa | #(c.grupos) = 1
 	all g:Grupo | #(g.selecoes) = 4
 	all g1:Grupo | all g2:Grupo | (g1 != g2) =>  (g1.selecoes != g2.selecoes)
+	SelecaoCampeaDoMundo = Jogo.selecao1 or SelecaoCampeaDoMundo = Jogo.selecao2 // Adicionei essa linha para especificar que sempre a selecao Campea participa do jogo
 }
 
 -- ASSERTS
@@ -111,7 +130,7 @@ assert SelecoesSaoDifeirentesSe{
 -- 30 para tecnico
 -- 64 para comissao
 -- 64 para medicos
--- 88 para jogadores
+-- 88 para jogadores se a quantidade de grupos for igual a 1
 pred show[]{}
-run show for 64--nao sei porque mas se colocar 30 funciona na primeira vez
+run show for 88
 

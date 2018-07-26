@@ -65,8 +65,8 @@ fact{
 fact cardinalidadeSelecao{
 
  	// Facts para titulares e reservas
-    	all s:Selecao | #(s.titulares) = 11
-        all s:Selecao | #(s.reservas) = 11
+    	all s:Selecao | #(s.titulares) = 11-- é necessario reduzir o nomero de 11 para um valor mais baixo para que não demore muito a gerar o grafico
+        all s:Selecao | #(s.reservas) = 11 -- é necessario reduzir o nomero de 11 para um valor mais baixo para que não demore muito a gerar o grafico
 
        all j:JogadorTitular | one  j.~titulares
 	all j1:JogadorReserva | one  j1.~reservas
@@ -92,6 +92,30 @@ fact{
 	all c:Copa | #(c.grupos) = 1
 	all g:Grupo | #(g.selecoes) = 4
 	all g1:Grupo | all g2:Grupo | (g1 != g2) =>  (g1.selecoes != g2.selecoes)
+}
+
+-- ASSERTS
+assert TodaSelecaoTemApenasUmTecnico{
+	all s: Selecao | one s.tecnico 
+}
+
+assert TodaComissaoEhCompostaPor3Pessoas{
+	all c: ComissaoTecnica | #(c.pessoasComissao) = 3
+}
+
+assert TodaSelecaoPossui4Medicos{
+	all s: Selecao | #(s.medicos) = 4
+}
+
+assert CopaTemApenasUmVencedor{
+	#SelecaoCampeaDoMundo = 1
+}
+
+assert SelecoesSaoDifeirentesSe{
+	all s1: Selecao | all s2: Selecao | (s1 != s2) => (s1.tecnico != s2.tecnico)
+	 all s1: Selecao | all s2: Selecao | (s1 != s2) => (s1.comissaoTecnica != s2.comissaoTecnica)
+	all s1: Selecao | all s2: Selecao | (s1 != s2) => (s1.medicos != s2.medicos)
+	all s1: Selecao | all s2: Selecao | (s1 != s2) => (s1.titulares + s1.reservas  != s2.titulares + s2.reservas)
 }
 
 -- 30 para tecnico

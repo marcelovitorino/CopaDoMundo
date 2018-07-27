@@ -1,5 +1,5 @@
-# Projeto-Alloy
-Projeto da disciplina Lógica para Computação - 2018.1 
+# CopaDoMundo
+Projeto-Alloy da disciplina Lógica para Computação - 2018.1 
 
 Tema: Copa do Mundo
 
@@ -15,4 +15,4 @@ Para que o torneio fique organizado, é necessário seguir algumas regras, como:
 
 Cliente: Agnaldo
 
-Integrantes: Thiago Santos, Gabriel Almeida, Marcelo Gabriel e José Vinicuis
+Integrantes: Thiago Santos, Gabriel Almeida, Marcelo Vitorino e José Vinicuis

@@ -1,7 +1,7 @@
 module CopaDoMundo
 
 one sig Copa{
-	jogos: one Jogo,  
+	jogos: Jogo,  
 	grupos: set Grupo
 }
 
@@ -10,18 +10,17 @@ sig Grupo {
 }
 
 sig Jogo {
-	selecao1: lone Selecao,
-	selecao2: lone Selecao
+	selecao1: Selecao,
+	selecao2: Selecao
 }
 
 sig Selecao {
 	titulares: set JogadorTitular,
 	reservas: set JogadorReserva,
-	medicos: set Medico, //ok
-	comissaoTecnica:  ComissaoTecnica, //ok
-	tecnico: one Tecnico //ok
+	medicos: set Medico,
+	comissaoTecnica:  ComissaoTecnica,
+	tecnico: one Tecnico
 }
-
 
 
 abstract sig Pessoa {}
@@ -39,20 +38,20 @@ sig ComissaoTecnica extends Pessoa {
 	pessoasComissao: set PessoaComissao 
 }
 
-sig SelecaoCampeaDoMundo in Selecao {} -- in selecoes
+sig SelecaoCampeaDoMundo in Selecao {} 
 
-pred cardinalidadesJogo[j:Jogo]{
-	#(j.selecao1) = 1
-	#(j.selecao2) = 1
-	 one j.~jogos // Uma instancia de Jogo tem que estar conectada a o atributo jogos de Copa
-}
-fact factsCopaJogo{
-    all c:Copa| one c.jogos -- copa ter  um jogo
-    all j: Jogo | cardinalidadesJogo[j]
-    all j: Jogo | j.selecao1 != j.selecao2
+pred JogoEhCompostoPor[j:Jogo]{
+	one j.selecao1
+	one j.selecao2
+	one j.~jogos // Uma instancia de Jogo tem que estar conectada a o atributo jogos de Copa
 }
 
-pred EhCompostaPor[s:Selecao]{
+pred CopaEhCompostaPor[c:Copa]{
+	one Jogo
+	some Grupo
+}
+
+pred SelecaoEhCompostaPor[s:Selecao]{
 	
 	some s.titulares
 	some s.reservas
@@ -63,44 +62,54 @@ pred EhCompostaPor[s:Selecao]{
 
 pred CardinalidadesSelecao[s:Selecao]{
 	
-	#(s.titulares) = 11 -- é necessario reduzir o numero de 11 para um valor mais baixo para que seja possivel gerar o grafico OU diminuir a quantidade de grupos
-	#(s.reservas) = 11 -- é necessario reduzir o numero de 11 para um valor mais baixo para que seja possivel gerar o grafico OU diminuir a quantidade de grupos
+	#(s.titulares) = 11 
+	#(s.reservas) = 11
 	#(s.medicos) = 4
 }
 
-pred CardinalidadesComissaoTecnica[c:ComissaoTecnica]{
-	
-	#(c.pessoasComissao) = 3
-	one c.~comissaoTecnica -- uma instancia de uma ComissaoTecnica tem que que estar ligada ao atributo comissaoTecnica de Selecao
+fact factsCopaJogo{
+    all c:Copa| one c.jogos -- copa ter  um jogo
+    all j: Jogo | JogoEhCompostoPor[j]
+    all j: Jogo | j.selecao1 != j.selecao2
 }
 
 fact FactsSelecao{
 
- 	all s:Selecao | EhCompostaPor[s]
+ 	all s:Selecao | SelecaoEhCompostaPor[s]
     	all s:Selecao | CardinalidadesSelecao[s]
-	all c: ComissaoTecnica | CardinalidadesComissaoTecnica[c]
+	all c:ComissaoTecnica | #PessoasDaComissaoTecnica[c] = 4
+	all c:ComissaoTecnica | one c.~comissaoTecnica -- uma instancia de uma ComissaoTecnica tem que que estar ligada ao atributo comissaoTecnica de Selecao
 
-       all j:JogadorTitular | one  j.~titulares
+        all j:JogadorTitular | one  j.~titulares
 	all j1:JogadorReserva | one  j1.~reservas
-
---	all s:Selecao | #(s.comissaoTecnica) = 1 //ok
 
 	all p: PessoaComissao | one p.~pessoasComissao // Toda instancia de uma PessoaComissao tem que que estar ligada ao set pessoasComissao de ComissaoTecnica
 	all m: Medico | one m.~medicos  // Toda instancia de um Medico tem que que estar ligada ao set medicos de Selecao
 	all t:Tecnico| one t.~tecnico // Toda instancia de um Tecnico tem que que estar ligada ao atributo tecnico de Selecao
+	
 }
 
+fun GruposDaCopa[c:Copa]: set Grupo{
+	c.grupos
+}
 
-fact cardinalidadesGerais{
+fun SelecoesDoGrupo[g:Grupo]: set Selecao{
+	g.selecoes
+}
+
+fun PessoasDaComissaoTecnica[c:ComissaoTecnica]: set PessoaComissao{
+	c.pessoasComissao
+}
+
+fact FactsGerais{
 	#Copa = 1
-	#Grupo = 1
-	#Selecao = 4
+	all c:Copa | CopaEhCompostaPor[c]
+	all c:Copa | #GruposDaCopa[c] = 1 // Eh necessario reduzir a quantidade de grupos para o Alloy conseguir gerar o grafo. O numero de grupos original seria 4.
+	all g:Grupo | #SelecoesDoGrupo[g] = 4
 	#SelecaoCampeaDoMundo = 1
 	all s:Selecao | some s.~selecoes 
-	all c:Copa | #(c.grupos) = 1
-	all g:Grupo | #(g.selecoes) = 4
 	all g1:Grupo | all g2:Grupo | (g1 != g2) =>  (g1.selecoes != g2.selecoes)
-	SelecaoCampeaDoMundo = Jogo.selecao1 or SelecaoCampeaDoMundo = Jogo.selecao2 // Adicionei essa linha para especificar que sempre a selecao Campea participa do jogo
+	SelecaoCampeaDoMundo = Jogo.selecao1 or SelecaoCampeaDoMundo = Jogo.selecao2 //Especifica que a selecao Campea sempre participa do jogo
 }
 
 -- ASSERTS
@@ -131,6 +140,7 @@ assert SelecoesSaoDifeirentesSe{
 -- 64 para comissao
 -- 64 para medicos
 -- 88 para jogadores se a quantidade de grupos for igual a 1
+ --Tempo Aproximado de execucao se tivermos apena 1 grupo: 7 minutos com as  Configuracoes: MaxMemory: 4092 MB  MaxStack: 8192 K
 pred show[]{}
 run show for 88
 
